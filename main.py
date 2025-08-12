@@ -16,7 +16,7 @@ def analyze():
     try:
         y, sr = librosa.load(filepath)
         tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
-        key = librosa.key.key_to_notes(librosa.key.estimate_tuning(y, sr=sr))
+        key = librosa.key_to_notes(librosa.key.estimate_tuning(y, sr=sr))
         return jsonify({'bpm': round(tempo, 2), 'key': key})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
