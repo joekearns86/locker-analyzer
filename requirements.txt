@@ -1,6 +1,5 @@
-fastapi
-uvicorn
+Flask
+gunicorn
 librosa
-soundfile
 numpy
-requests
+soundfile
