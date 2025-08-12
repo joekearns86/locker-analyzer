@@ -47,7 +47,7 @@ def analyze_file(path):
     y, sr = librosa.load(path, sr=11025, mono=True, duration=90.0)  # 90s max, 11.025 kHz
     # tempo via onset envelope (lighter than full beat pipeline)
     onset_env = librosa.onset.onset_strength(y=y, sr=sr)
-    tempo = librosa.beat.tempo(onset_envelope=onset_env, sr=sr, aggregate=np.median)
+    tempo = librosa.beat.tempo(onset_envelope=onset_env, sr=sr, aggregate='median')
     bpm = int(float(np.squeeze(tempo)))
     key_pc, mode = estimate_key(y, sr)
     musical_key = f"{key_pc}{'m' if mode=='minor' else ''}"
