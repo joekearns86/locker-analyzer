@@ -1,5 +1,4 @@
 Flask
-Flask-CORS
 gunicorn
 librosa
 numpy
