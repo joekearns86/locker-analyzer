@@ -10,3 +10,11 @@ scipy==1.11.4
 soundfile==0.12.1
 audioread==3.0.1
 librosa==0.10.1
+
+fastapi
+uvicorn[standard]
+requests
+librosa==0.10.1
+numpy
+scipy
+soundfile
