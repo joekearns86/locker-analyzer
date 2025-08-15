@@ -1,31 +1,33 @@
+# app.py
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, HttpUrl
-from analyze import process_audio
+from pydantic import BaseModel
 import os
 
-from fastapi.middleware.cors import CORSMiddleware
+# This must match the function name defined in analyze.py
+from analyze import process_audio
 
-class AnalyzeReq(BaseModel):
-    url: HttpUrl
+APP_VERSION = os.getenv("ANALYZER_VERSION", "locker-analyzer@1.0.0")
 
-app = FastAPI()
+app = FastAPI(title="Locker Analyzer", version=APP_VERSION)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],      # tighten later to your app’s domain(s)
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
+class AnalyzeIn(BaseModel):
+    url: str
+    max_time: int | None = 180  # seconds cap for analysis
+
 
 @app.get("/health")
 def health():
-    return {"ok": True, "version": os.getenv("ANALYZER_VERSION", "locker-analyzer@dev")}
+    return {"ok": True, "version": APP_VERSION}
+
 
 @app.post("/analyze")
-def analyze(body: AnalyzeReq):
+def analyze(inp: AnalyzeIn):
     try:
-        result = process_audio(str(body.url))
+        result = process_audio(inp.url, max_time=inp.max_time or 180)
+        # You can wrap the result if you want a standard envelope:
+        # return {"ok": True, "result": result}
         return result
     except Exception as e:
+        # Surface a clear error to clients & Render logs
         raise HTTPException(status_code=400, detail=f"analyze_failed: {e}")
