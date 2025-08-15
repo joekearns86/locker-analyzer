@@ -3,10 +3,20 @@ from pydantic import BaseModel, HttpUrl
 from analyze import process_audio
 import os
 
+from fastapi.middleware.cors import CORSMiddleware
+
 class AnalyzeReq(BaseModel):
     url: HttpUrl
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],      # tighten later to your app’s domain(s)
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/health")
 def health():
