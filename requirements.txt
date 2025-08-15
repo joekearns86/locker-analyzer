@@ -3,3 +3,11 @@ uvicorn[standard]==0.30.0
 pydantic==2.8.2
 requests==2.32.3
 python-multipart==0.0.9
+
+# analysis stack
+numpy==1.26.4
+scipy==1.11.4
+soundfile==0.12.1
+audioread==3.0.1
+librosa==0.10.1
+aubio==0.4.9
