@@ -211,3 +211,19 @@ def analyze(inp: AnalyzeIn):
                 os.remove(tmp)
             except Exception:
                 pass
+# --- REQUIRED EXPORT FOR app.py ---
+# app.py imports: from analyze import process_audio
+# Make sure THIS exact function exists.
+
+def process_audio(url: str, max_time: int | None = 180) -> dict:
+    """
+    Required entrypoint. Call your real analyzer from here.
+    Replace `analyze_track` with whatever your actual function is named.
+    Keep imports inside to avoid top-level import crashes at app startup.
+    """
+    # Import heavy libs lazily to avoid init-time crashes preventing app boot.
+    # from librosa import load  # example: do heavy imports inside your real function
+
+    # >>> CHANGE THIS LINE to call your real implementation <<<
+    # Example if your function is named `analyze_track` in this same file:
+    return analyze_track(url=url, max_time=max_time)
