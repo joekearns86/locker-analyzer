@@ -227,3 +227,52 @@ def process_audio(url: str, max_time: int | None = 180) -> dict:
     # >>> CHANGE THIS LINE to call your real implementation <<<
     # Example if your function is named `analyze_track` in this same file:
     return analyze_track(url=url, max_time=max_time)
+
+def process_audio(url: str, max_time: int = 180) -> dict:
+    """
+    Download the audio from `url`, run analysis, and return structured metadata.
+    """
+    # 1. Load audio (downsample for speed)
+    import librosa
+    import numpy as np
+    import tempfile
+    import requests
+    import soundfile as sf
+
+    with tempfile.NamedTemporaryFile(suffix=".mp3") as tmp:
+        r = requests.get(url, stream=True, timeout=30)
+        r.raise_for_status()
+        with open(tmp.name, "wb") as f:
+            for chunk in r.iter_content(1024 * 64):
+                f.write(chunk)
+
+        # Load mono, 22.05kHz for speed
+        y, sr = librosa.load(tmp.name, sr=22050, mono=True, duration=max_time)
+
+    # 2. BPM estimation
+    tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+    bpm_confidence = float(len(beat_frames) / (len(y) / sr)) if len(beat_frames) > 0 else 0.0
+    bpm_alt_half = tempo / 2.0
+    bpm_alt_double = tempo * 2.0
+
+    # 3. Key estimation
+    chroma = librosa.feature.chroma_cqt(y=y, sr=sr)
+    chroma_mean = chroma.mean(axis=1)
+    key_root = int(np.argmax(chroma_mean))
+    key_mode = "major" if chroma_mean[key_root] > np.median(chroma_mean) else "minor"
+    key_confidence = float(chroma_mean[key_root] / chroma_mean.sum())
+
+    # 4. Tuning (cents offset from equal temperament)
+    tuning_cents = float(librosa.pitch_tuning(librosa.yin(y, fmin=50, fmax=2000, sr=sr)))
+
+    # 5. Return structured dict
+    return {
+        "bpm": float(tempo),
+        "bpm_confidence": bpm_confidence,
+        "bpm_alt_half": float(bpm_alt_half),
+        "bpm_alt_double": float(bpm_alt_double),
+        "key_root": str(key_root),
+        "key_mode": key_mode,
+        "key_confidence": key_confidence,
+        "tuning_cents": tuning_cents,
+    }
